@@ -67,6 +67,8 @@ export const GameContainer = () => {
 
     const handleCrazyEight = () => setCrazyEight(!isCrazyEight);
 
+    // Below this line i'm planning on grouping these functions into an object one all the functionality is implemented to keep the logic all together and easy to read, use, and understand.
+
     // Removes a card from the player's hand and places it in the pile
     const putCardInPile = (card) => {
 

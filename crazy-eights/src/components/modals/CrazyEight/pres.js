@@ -1,4 +1,4 @@
-import { Box, Button, Container, Modal } from "@mui/material";
+import { Box, Container, Modal } from "@mui/material";
 import { styled } from '@mui/system';
 
 const SuitItem = styled(Box)(({ theme }) =>
@@ -18,6 +18,7 @@ export const CrazyEightPres = ({
 }) => {
     return (
         <Modal
+            disableAutoFocus={true}
             open={open}
             onClose={onClose}
         >
@@ -59,11 +60,13 @@ export const CrazyEightPres = ({
                             component='img'
                             src='/heart-symbol.png'
                             alt='hearts symbol'
+                            onClick={onClose}
                         />
                         <SuitItem
                             component='img'
                             src='/spade-symbol.png'
                             alt='spades symbol'
+                            onClick={onClose}
                         />
                     </Container>
                     <Container
@@ -79,11 +82,13 @@ export const CrazyEightPres = ({
                             component='img'
                             src='/club-symbol.png'
                             alt='clubs symbol'
+                            onClick={onClose}
                         />
                         <SuitItem
                             component='img'
                             src='/diamond-symbol.png'
                             alt='diamonds symbol'
+                            onClick={onClose}
                         />
                     </Container>
                 </Container>

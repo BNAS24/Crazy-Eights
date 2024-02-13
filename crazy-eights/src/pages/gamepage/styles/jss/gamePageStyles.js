@@ -23,7 +23,6 @@ export const gamePageStyles = {
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'flex-start',
-        border: 'dashed 1px blue',
         height: '100%',
         overflow: 'hidden',
         paddingTop: '24px',
