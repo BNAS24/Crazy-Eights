@@ -26,14 +26,20 @@ export const gamePageStyles = {
         border: 'dashed 1px blue',
         height: '100%',
         overflow: 'hidden',
+        paddingTop: '24px',
+        paddingBottom: '24px',
         firstCard: {
             height: 'auto',
             width: '80px',
+            boxShadow: '-8px 0px 8px #100c08',
         },
         deck: {
             marginLeft: '-81px',
             height: 'auto',
             width: '80px',
+            '&:hover': {
+                cursor: 'pointer',
+            },
         },
         cardPool: {
             position: 'absolute',

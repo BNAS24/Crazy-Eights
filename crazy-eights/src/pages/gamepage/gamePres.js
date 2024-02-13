@@ -1,10 +1,15 @@
 import { Box, Container } from "@mui/material";
 import { useTheme } from '@mui/system';
-import { gamePageStyles } from "./styles/jssStyles";
+import { gamePageStyles } from "./styles/jss/gamePageStyles";
+import { CrazyEightContainer } from "../../components/modals/CrazyEight/container";
 
 export const GamePagePres = ({
     firstCard,
     userCardsInHand,
+    putCardInPile,
+    playerDrawsACard,
+    handleCrazyEight,
+    isCrazyEight,
 }) => {
 
     const theme = useTheme();
@@ -40,6 +45,7 @@ export const GamePagePres = ({
             >
                 {[...Array(8)].map((_, index) => (
                     <Box
+                        onClick={playerDrawsACard}
                         key={index}
                         component='img'
                         src='https://deckofcardsapi.com/static/img/back.png'
@@ -49,12 +55,11 @@ export const GamePagePres = ({
                                 ? gamePageStyles.deckOfCardConainer.firstCard
                                 : gamePageStyles.deckOfCardConainer.deck,
                         }}
-
                     />
                 ))}
                 <Box
                     component='img'
-                    src={firstCard?.cards?.[0]?.image || null}
+                    src={firstCard?.cards?.[0]?.image || firstCard?.image}
                     alt='card pool'
                     sx={{
                         ...gamePageStyles.deckOfCardConainer.cardPool
@@ -66,6 +71,7 @@ export const GamePagePres = ({
             >
                 {userCardsInHand?.cards?.map((card) => (
                     <Box
+                        onClick={() => putCardInPile(card)}
                         key={card.code}
                         component='img'
                         src={card.image}
@@ -76,6 +82,10 @@ export const GamePagePres = ({
                     />
                 ))}
             </Container>
+            <CrazyEightContainer 
+                isCrazyEight={isCrazyEight}
+                handleCrazyEight={handleCrazyEight}
+            />
         </Container>
     )
 }
