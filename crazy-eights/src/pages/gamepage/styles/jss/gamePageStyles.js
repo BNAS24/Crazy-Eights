@@ -11,6 +11,7 @@ export const gamePageStyles = {
     opponentCardStackContainer: {
         display: 'flex',
         justifyContent: 'center',
+        flexWrap: 'wrap',
         cards: {
             height: 'auto',
             width: '80px',
@@ -52,6 +53,7 @@ export const gamePageStyles = {
     userCardStackContainer: {
         display: 'flex',
         justifyContent: 'center',
+        flexWrap: 'wrap',
         cards: {
             height: 'auto',
             width: '80px',

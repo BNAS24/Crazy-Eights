@@ -1,7 +1,7 @@
-import { Box, Container } from "@mui/material";
+import { Box, Container, Typography } from "@mui/material";
 import { useTheme } from '@mui/system';
 import { gamePageStyles } from "./styles/jss/gamePageStyles";
-import { CrazyEightContainer } from "../../components/modals/CrazyEight/container";
+import { CrazyEightContainer } from "../../components/modals/CrazyEight/Container";
 
 export const GamePagePres = ({
     firstCard,
@@ -10,6 +10,7 @@ export const GamePagePres = ({
     playerDrawsACard,
     handleCrazyEight,
     isCrazyEight,
+    isSuitSelected,
 }) => {
 
     const theme = useTheme();
@@ -65,6 +66,22 @@ export const GamePagePres = ({
                         ...gamePageStyles.deckOfCardConainer.cardPool
                     }}
                 />
+                <Container
+                    sx={{
+                        position: 'absolute',
+                        top: '50%',
+                        left: '50%',
+                        transform: 'translate(10%, -50%)',
+                    }}
+                >
+                    {isSuitSelected && (
+                        <Typography
+                            variant='h5'
+                        >
+                            {isSuitSelected} selected!
+                        </Typography>
+                    )}
+                </Container>
             </Container>
             <Container
                 sx={{ ...gamePageStyles.userCardStackContainer }}
@@ -82,7 +99,7 @@ export const GamePagePres = ({
                     />
                 ))}
             </Container>
-            <CrazyEightContainer 
+            <CrazyEightContainer
                 isCrazyEight={isCrazyEight}
                 handleCrazyEight={handleCrazyEight}
             />

@@ -1,5 +1,5 @@
-import { GamePagePres } from './gamePres'
-import { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react';
+import { GamePagePres } from './gamePres';
 
 export const GameContainer = () => {
 
@@ -7,6 +7,7 @@ export const GameContainer = () => {
     const [firstCard, setFirstCard] = useState({});
     const [userCardsInHand, setUsersCardsInHand] = useState({});
     const [isCrazyEight, setCrazyEight] = useState(false);
+    const [isSuitSelected, setSuitSelected] = useState(null);
 
     useEffect(() => {
         const setupGame = async () => {
@@ -65,90 +66,109 @@ export const GameContainer = () => {
     // console.log('first card', firstCard);
     // console.log('users current cards in hand', userCardsInHand);
 
-    const handleCrazyEight = () => setCrazyEight(!isCrazyEight);
+    const gameFunctions = {
 
-    // Below this line i'm planning on grouping these functions into an object one all the functionality is implemented to keep the logic all together and easy to read, use, and understand.
-
-    // Removes a card from the player's hand and places it in the pile
-    const putCardInPile = (card) => {
-
-        const selectedCard = card;
-
-        if (selectedCard.value === '8') {
-
-            // Logic for when a card is 8
-
-            // Ends above this line
-
-            handleCrazyEight();
-
-            setFirstCard(selectedCard);
-
-
-            const updatedHandState = {
-                ...userCardsInHand,
-                cards: userCardsInHand.cards.filter((card) => (card.code) !== (selectedCard.code)),
-            };
-
-            setUsersCardsInHand(updatedHandState);
-
-        } else if (
-            ((firstCard.cards?.[0]?.suit || firstCard.suit) === selectedCard.suit) ||
-            ((firstCard.cards?.[0]?.value || firstCard.value) === selectedCard.value)
-        ) {
-
-            // Conditional logic for when a card is either a 2 or 4 will put here 
-
-
-            // Ends above this line
-
-            setFirstCard(selectedCard);
-
-            const updatedHandState = {
-                ...userCardsInHand,
-                cards: userCardsInHand.cards.filter((card) => card.code !== selectedCard.code),
-            };
-
-            setUsersCardsInHand(updatedHandState);
-
-        } else {
-            return;
-        }
-
-    };
-
-    const playerDrawsACard = async () => {
-        try {
-            const response = await fetch(`https://deckofcardsapi.com/api/deck/${newDeck.deck_id}/draw/?count=1`);
-
-            if (!response.ok) {
-                console.error('Failed to draw card from deck');
+        handleCrazyEight: (event, reason) => {
+            if (reason === "backdropClick" || reason === "escapeKeyDown") {
+                return;
             }
 
-            const card = await response.json();
+            // Checks if the event object is true and sets the suit selected state accordingly
+            if (event) {
+                console.log(event.target.alt);
+                setSuitSelected(event.target.alt);
+            }
 
-            console.log('card', card);
+            setCrazyEight(!isCrazyEight);
+        },
+        putCardInPile: (card, event) => {
+            const selectedCard = card;
 
-            // Add card to players hand
-            setUsersCardsInHand((prevUserCardsInHand) => {
-                return {
-                    ...prevUserCardsInHand,
-                    cards: [...prevUserCardsInHand.cards, card.cards[0]],
+            if (isSuitSelected !== null && selectedCard.value === '8' && isCrazyEight === true) {
+
+                console.log('First condition selected');
+
+                console.log('Suit selected state:', isSuitSelected);
+
+                setFirstCard(selectedCard);
+
+                const updatedHandState = {
+                    ...userCardsInHand,
+                    cards: userCardsInHand.cards.filter((card) => (card.code) !== (selectedCard.code)),
                 };
-            });
-        } catch (error) {
-            console.log(error);
-        }
+
+                setUsersCardsInHand(updatedHandState);
+
+            } else if (selectedCard.value === '8') {
+
+                setSuitSelected(null);
+
+                gameFunctions.handleCrazyEight(event);
+
+                setFirstCard(selectedCard);
+
+                const updatedHandState = {
+                    ...userCardsInHand,
+                    cards: userCardsInHand.cards.filter((card) => (card.code) !== (selectedCard.code)),
+                };
+
+                setUsersCardsInHand(updatedHandState);
+
+            } else if (
+                ((firstCard.cards?.[0]?.suit || firstCard.suit) === selectedCard.suit) ||
+                ((firstCard.cards?.[0]?.value || firstCard.value) === selectedCard.value)
+            ) {
+                setSuitSelected(null);
+
+                // Conditional logic for when a card is either a 2 or 4 will put here
+                setFirstCard(selectedCard);
+
+                const updatedHandState = {
+                    ...userCardsInHand,
+                    cards: userCardsInHand.cards.filter((card) => card.code !== selectedCard.code),
+                };
+
+                setUsersCardsInHand(updatedHandState);
+            } else {
+                return;
+            }
+        },
+
+        playerDrawsACard: async () => {
+            try {
+
+                const response = await fetch(`https://deckofcardsapi.com/api/deck/${newDeck.deck_id}/draw/?count=1`);
+
+                if (!response.ok) {
+                    console.error('Failed to draw card from deck');
+                }
+
+                const card = await response.json();
+
+                console.log('card', card);
+
+                setUsersCardsInHand((prevUserCardsInHand) => {
+                    return {
+                        ...prevUserCardsInHand,
+                        cards: [...prevUserCardsInHand.cards, card.cards[0]],
+                    };
+                });
+
+            } catch (error) {
+                console.log(error);
+            }
+        },
     };
 
     return (
         <GamePagePres
             firstCard={firstCard}
             userCardsInHand={userCardsInHand}
-            putCardInPile={putCardInPile}
-            playerDrawsACard={playerDrawsACard}
-            handleCrazyEight={handleCrazyEight}
+            putCardInPile={gameFunctions.putCardInPile}
+            playerDrawsACard={gameFunctions.playerDrawsACard}
+            handleCrazyEight={gameFunctions.handleCrazyEight}
             isCrazyEight={isCrazyEight}
+            isSuitSelected={isSuitSelected}
         />
     )
 }

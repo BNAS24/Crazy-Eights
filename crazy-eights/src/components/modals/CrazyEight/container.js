@@ -1,4 +1,4 @@
-import { CrazyEightPres } from "./pres"
+import { CrazyEightPres } from "./Pres"
 
 export const CrazyEightContainer = ({
     isCrazyEight,
