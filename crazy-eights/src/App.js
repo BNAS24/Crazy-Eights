@@ -3,6 +3,7 @@ import { ThemeProvider } from '@mui/material/styles';
 import { useState } from 'react';
 import { Route, Routes } from 'react-router-dom';
 import './App.css';
+import { appStyles } from './styles/mainApp.js/jss';
 import { GameContainer } from './pages/gamepage/gameContainer';
 import { HomePageContainer } from './pages/homepage/homePageContainer';
 import { darkModeTheme, lightModeTheme } from './styles/themes/muiTheme';
@@ -21,14 +22,7 @@ export const App = () => {
         disableElevation
         onClick={toggleDarkMode}
         sx={{
-          position: 'absolute',
-          top: '00px',
-          color: 'var(--theme-white)',
-          backgroundColor: 'var(--theme-black)',
-          zIndex: 1000,
-          '&:hover':{
-            backgroundColor: 'grey',
-          }
+          ...appStyles.themeButton
         }}
       >
         theme mode

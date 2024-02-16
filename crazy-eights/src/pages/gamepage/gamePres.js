@@ -4,13 +4,9 @@ import { gamePageStyles } from "./styles/jss/gamePageStyles";
 import { CrazyEightContainer } from "../../components/modals/CrazyEight/Container";
 
 export const GamePagePres = ({
-    firstCard,
-    userCardsInHand,
-    putCardInPile,
-    playerDrawsACard,
-    handleCrazyEight,
-    isCrazyEight,
-    isSuitSelected,
+    cards,
+    playerActions,
+    crazyEightState,
 }) => {
 
     const theme = useTheme();
@@ -29,12 +25,13 @@ export const GamePagePres = ({
                     ...gamePageStyles.opponentCardStackContainer
                 }}
             >
-                {[...Array(8)].map((_, index) => (
+                {cards.compCardsInHand?.cards?.map((card) => (
                     <Box
-                        key={index}
+                        key={card.code}
                         component='img'
+                        // src={card.image}
                         src='https://deckofcardsapi.com/static/img/back.png'
-                        alt="card"
+                        alt={card.code}
                         sx={{
                             ...gamePageStyles.opponentCardStackContainer.cards
                         }}
@@ -46,7 +43,7 @@ export const GamePagePres = ({
             >
                 {[...Array(8)].map((_, index) => (
                     <Box
-                        onClick={playerDrawsACard}
+                        onClick={playerActions.playerDrawsACard}
                         key={index}
                         component='img'
                         src='https://deckofcardsapi.com/static/img/back.png'
@@ -60,7 +57,7 @@ export const GamePagePres = ({
                 ))}
                 <Box
                     component='img'
-                    src={firstCard?.cards?.[0]?.image || firstCard?.image}
+                    src={cards?.firstCard?.cards?.[0]?.image || cards?.firstCard?.image}
                     alt='card pool'
                     sx={{
                         ...gamePageStyles.deckOfCardConainer.cardPool
@@ -74,11 +71,11 @@ export const GamePagePres = ({
                         transform: 'translate(10%, -50%)',
                     }}
                 >
-                    {isSuitSelected && (
+                    {crazyEightState.isSuitSelected && (
                         <Typography
                             variant='h5'
                         >
-                            {isSuitSelected} selected!
+                            {crazyEightState.isSuitSelected} selected!
                         </Typography>
                     )}
                 </Container>
@@ -86,9 +83,9 @@ export const GamePagePres = ({
             <Container
                 sx={{ ...gamePageStyles.userCardStackContainer }}
             >
-                {userCardsInHand?.cards?.map((card) => (
+                {cards.userCardsInHand?.cards?.map((card) => (
                     <Box
-                        onClick={() => putCardInPile(card)}
+                        onClick={() => playerActions.putCardInPile(card)}
                         key={card.code}
                         component='img'
                         src={card.image}
@@ -100,9 +97,9 @@ export const GamePagePres = ({
                 ))}
             </Container>
             <CrazyEightContainer
-                isCrazyEight={isCrazyEight}
-                handleCrazyEight={handleCrazyEight}
+                isCrazyEight={crazyEightState.isCrazyEight}
+                handleCrazyEight={playerActions.handleCrazyEight}
             />
         </Container>
     )
-}
+};
