@@ -29,8 +29,8 @@ export const GamePagePres = ({
                     <Box
                         key={card.code}
                         component='img'
-                        // src={card.image}
-                        src='https://deckofcardsapi.com/static/img/back.png'
+                        src={card.image}
+                        // src='https://deckofcardsapi.com/static/img/back.png'
                         alt={card.code}
                         sx={{
                             ...gamePageStyles.opponentCardStackContainer.cards
