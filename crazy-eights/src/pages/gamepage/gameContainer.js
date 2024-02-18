@@ -9,6 +9,7 @@ export const GameContainer = () => {
     const [compCardsInHand, setCompCardsInHand] = useState({});
     const [isCrazyEight, setCrazyEight] = useState(false);
     const [isSuitSelected, setSuitSelected] = useState(null);
+    const [pileHistory, setPileHistory] = useState([]);
     const [whosTurn, setTurn] = useState({
         user: true,
         computer: false,
@@ -83,149 +84,163 @@ export const GameContainer = () => {
 
     }, []);
 
+    useEffect(() => {
+        console.log(whosTurn);
+    }, [whosTurn]);
+
+    useEffect(() => {
+        if(newDeck.length === 0) {
+            console.log('Deck being shuffled')
+        } else {
+            setPileHistory(prevPileHistory => [
+                ...prevPileHistory,
+                firstCard.code
+            ]);
+        }
+
+    }, [firstCard, newDeck]);
+
+    // Uncomment for testing purposes
 
     // console.log('deck of cards', newDeck);
     // console.log('first card', firstCard);
     // console.log('users current cards in hand', userCardsInHand);
     // console.log('computers cards in hand', compCardsInHand);
     // console.log('whos turn global', whosTurn);
+    console.log('pile history', pileHistory)
 
     const gameFunctions = {
 
         compCardPlayResponses: async (suit, value, card) => {
+            console.log({
+                message: 'Last card from pile being shown in computerResponse function',
+                suit,
+                value,
+                card,
+            });
 
-            console.log('Last card from pile being shown in computerResponse function', card)
+            const suitUpperCased = suit.toUpperCase();
 
-            setTurn((prevTurn) => ({
-                user: !prevTurn.user,
-                computer: !prevTurn.computer,
-            }));
+            if (suitUpperCased && value === '8') {
 
-            const suitUpperCase = suit.toUpperCase();
+                const randomlySelectedCard = compCardsInHand.cards
+                    .filter(card => card.suit === suitUpperCased)
+                [Math.floor(Math.random() * compCardsInHand.cards.filter(card => card.suit === suitUpperCased).length)];
 
-            if (suitUpperCase && (value === '8')) {
-                const findMatchingSuit = compCardsInHand.cards.filter(card => card.suit === suitUpperCase);
-                const randomIndex = Math.floor(Math.random() * findMatchingSuit.length);
-                const randomlySelectedCard = findMatchingSuit[randomIndex];
-
-                console.log('Randomly selected card:', randomlySelectedCard);
-                console.log('compuer cards in hand', compCardsInHand)
-
-                const updatedCompCardsInHandState = {
-                    ...compCardsInHand,
-                    cards: compCardsInHand.cards.filter((card) => card !== randomlySelectedCard),
-                };
-
-                switch (suitUpperCase) {
-                    case 'HEARTS':
-                        console.log(`Computer has to put down a ${suit} card or pluck from the deck`);
-                        setTimeout(() => {
-                            setCompCardsInHand(updatedCompCardsInHandState)
-                            gameFunctions.putCardInPile(randomlySelectedCard);
-                        }, 1000)
-                        break;
-                    case 'DIAMONDS':
-                        console.log(`Computer has to put down a ${suit} card or pluck from the deck`);
-                        setTimeout(() => {
-                            setCompCardsInHand(updatedCompCardsInHandState)
-
-                            gameFunctions.putCardInPile(randomlySelectedCard);
-                        }, 1000)
-                        break;
-                    case 'SPADES':
-                        console.log(`Computer has to put down a ${suit} card or pluck from the deck`);
-                        setTimeout(() => {
-                            setCompCardsInHand(updatedCompCardsInHandState)
-
-                            gameFunctions.putCardInPile(randomlySelectedCard);
-                        }, 1000)
-                        break;
-                    case 'CLUBS':
-                        console.log(`Computer has to put down a ${suit} card or pluck from the deck`);
-                        setTimeout(() => {
-                            setCompCardsInHand(updatedCompCardsInHandState)
-
-                            gameFunctions.putCardInPile(randomlySelectedCard);
-                        }, 1000)
-                        break;
-                    default:
-                        console.log(`something went wrong in this switch`);
-                }
-            }
-
-            if (value === '2' || value === '4') {
-                switch (value) {
-                    case '2':
-                        console.log('The oppenet has to draw 2!');
-                        break;
-                    case '4':
-                        console.log('The oppenent is skipped!');
-                        break;
-                    default:
-                        console.log(`something went wrong in this switch`);
-                }
-            }
-
-            if ((value !== '8') && (value !== '2') && (value !== '4')) {
-                console.log(`Card reached the right conditional statement: ${card}`)
-                // const findMatchingSuit = compCardsInHand.cards.filter(card => card.suit === suitUpperCase);
-                const findMatchingSuit = compCardsInHand.cards.filter(card => card.suit === suitUpperCase || card.value === value);
-
-                const randomIndex = Math.floor(Math.random() * findMatchingSuit.length);
-                const randomlySelectedCard = findMatchingSuit[randomIndex];
-
-                console.log(`Computer looks for ${suit} or ${value} in hand`);
-                console.log('Randomly selected card:', randomlySelectedCard);
+                console.log({
+                    randomlySelectedCard,
+                    computersCardsInHand: compCardsInHand,
+                });
 
                 const updatedCompCardsInHandState = {
                     ...compCardsInHand,
                     cards: compCardsInHand.cards.filter((card) => card !== randomlySelectedCard),
                 };
 
-                setCompCardsInHand(updatedCompCardsInHandState)
+                const suitMessage = `Computer has to put down a ${suit} card or pluck from the deck`;
+                console.log(suitMessage);
 
-                switch (suit) {
-                    case 'HEARTS':
+                setTimeout(() => {
+
+                    setCompCardsInHand(updatedCompCardsInHandState);
+
+                    gameFunctions.putCardInPile(randomlySelectedCard);
+
+                }, 1000);
+
+            } else if (value === '2' || value === '4') {
+
+                // Adjust count based on the value
+                const drawCardsCount = value === '2' ? 2 : 0;
+
+                if (drawCardsCount > 0) {
+
+                    try {
+
+                        const response = await fetch(`https://deckofcardsapi.com/api/deck/${newDeck.deck_id}/draw/?count=${drawCardsCount}`);
+
+                        if (!response.ok) {
+                            console.error('Failed to draw cards from the deck');
+                        }
+
+                        const cards = await response.json();
+
                         setTimeout(() => {
-                            setFirstCard(randomlySelectedCard)
-                        }, 2000)
-                        console.log('hearts switch case met');
-                        console.log('compuer cards in hand', compCardsInHand)
-                        break;
-                    case 'DIAMONDS':
-                        setTimeout(() => {
-                            setFirstCard(randomlySelectedCard)
-                        }, 2000)
-                        console.log('diamonds switch case met');
-                        console.log('compuer cards in hand', compCardsInHand)
-                        break;
-                    case 'SPADES':
-                        setTimeout(() => {
-                            setFirstCard(randomlySelectedCard)
-                        }, 2000)
-                        console.log('spades switch case met');
-                        console.log('compuer cards in hand', compCardsInHand)
-                        break;
-                    case 'CLUBS':
-                        setTimeout(() => {
-                            setFirstCard(randomlySelectedCard)
-                        }, 2000)
-                        console.log('clubs switch case met');
-                        console.log('compuer cards in hand', compCardsInHand)
-                        break;
-                    default:
-                        console.log(`No suit available: ${suit}`);
+                            setCompCardsInHand((prevCompCardsInHand) => ({
+                                ...prevCompCardsInHand,
+                                cards: [...prevCompCardsInHand.cards, ...cards.cards],
+                            }));
+                        }, 2000);
+
+                        console.log(`The opponent has to draw ${drawCardsCount} card${drawCardsCount > 1 ? 's' : ''}!`);
+
+                    } catch (error) {
+                        console.error('Error fetching or processing cards:', error);
+                    }
+                } else if (value === '4') {
+
+                    console.log('The opponent is skipped!');
+
+                } else {
+
+                    console.log('Something went wrong in this switch');
+
                 }
-            };
+            } else if (value !== '8' && value !== '2' && value !== '4') {
 
-            // Logic above this line
+                setTimeout(() => {
+                    console.log({
+                        message: 'Card reached the right conditional statement',
+                        card,
+                    });
+
+                    const randomlySelectedCard = compCardsInHand.cards
+                        .filter(card => card.suit === suitUpperCased || card.value === value)
+                    [Math.floor(Math.random() * compCardsInHand.cards.filter(card => card.suit === suitUpperCased || card.value === value).length)];
+
+                    if (randomlySelectedCard === undefined) {
+                        // Handle the case when there are no matching cards
+                        console.log('There were no matching cards in hand');
+                        gameFunctions.playerDrawsACard();
+                        return;
+                    }
+
+                    console.log({
+                        message1: `Computer looks for ${suit} or ${value} in hand`,
+                        message2: `Randomly selected card: ${randomlySelectedCard.code}`,
+                    });
+
+                    const updatedCompCardsInHandState = {
+                        ...compCardsInHand,
+                        cards: compCardsInHand.cards.filter((card) => card !== randomlySelectedCard),
+                    };
+
+                    setCompCardsInHand(updatedCompCardsInHandState);
+
+                    setFirstCard(randomlySelectedCard);
+                    switch (suit) {
+                        case 'HEARTS':
+                        case 'DIAMONDS':
+                        case 'SPADES':
+                        case 'CLUBS':
+                            console.log(`${suit} switch case met`);
+                            console.log('computer cards in hand', compCardsInHand);
+                            break;
+                        default:
+                            console.log(`No suit available: ${suit}`);
+                    }
+                }, 2000);
+
+            }
+
+            // Put logic above this line
             setTimeout(() => {
-                setTurn((prevTurn) => ({
-                    user: !prevTurn.user,
-                    computer: !prevTurn.computer,
-                }));
+                setTurn({
+                    user: true,
+                    computer: false,
+                });
                 console.log('Computer played card!');
-            }, 3000)
+            }, 3000);
         },
 
         handleCrazyEight: (event, reason) => {
@@ -251,10 +266,15 @@ export const GameContainer = () => {
         },
 
         putCardInPile: (card, event) => {
-            // Stops the player from pressing multiple cards when it's the computers turn
-            // if (whosTurn.computer) {
-            //     return;
-            // }
+            // // Stops the player from pressing multiple cards when it's the computers turn
+            if (whosTurn.computer) {
+                return;
+            }
+
+            setTurn({
+                user: false,
+                computer: true,
+            });
 
             const selectedCard = card;
 
@@ -273,19 +293,11 @@ export const GameContainer = () => {
 
                 setUsersCardsInHand(updatedHandState);
 
-                // const suit = event.target.suit
-
-                // gameFunctions.compCardPlayResponses(suit);
-
             } else if ((selectedCard.value === '8') && (isSuitSelected === null)) {
 
                 console.log('Opening crazy eight modal (putCardInPile 2nd else if)');
 
                 setCrazyEight(true);
-
-                // setSuitSelected(null);
-
-                // gameFunctions.handleCrazyEight(event);
 
                 setFirstCard(selectedCard);
 
@@ -301,15 +313,13 @@ export const GameContainer = () => {
                 ((firstCard.cards?.[0]?.value || firstCard.value) === selectedCard.value) ||
                 ((isSuitSelected && (whosTurn.computer === true)))
             ) {
-                // console.log('isSuitSelected', isSuitSelected);
-                // console.log('whos turn', whosTurn);
                 console.log('putCardInPile() final "else if" called. Triggering computer response.');
 
                 // Sets the suit to null to remove the crazy eight suit text that is next to the card in the pile
                 setSuitSelected(null);
 
                 // Add a new card to the pile the goes on top of the previous card put down
-                if (!whosTurn.computer) {
+                if (whosTurn.computer === false) {
                     setFirstCard(selectedCard);
 
                     // find the card in the user's hand *state* and removes it
@@ -331,6 +341,7 @@ export const GameContainer = () => {
         },
 
         playerDrawsACard: async () => {
+            console.log('Player drawing a card')
             try {
 
                 const response = await fetch(`https://deckofcardsapi.com/api/deck/${newDeck.deck_id}/draw/?count=1`);
@@ -340,34 +351,67 @@ export const GameContainer = () => {
                 }
 
                 const card = await response.json();
-
-                setUsersCardsInHand((prevUserCardsInHand) => {
-                    return {
-                        ...prevUserCardsInHand,
-                        cards: [...prevUserCardsInHand.cards, card.cards[0]],
-                    };
-                });
+                console.log('drawn card', card)
+                if (whosTurn.user) {
+                    console.log({
+                        message: 'USER drew a card from the deck',
+                        whosTurn: whosTurn
+                    })
+                    setUsersCardsInHand((prevUserCardsInHand) => {
+                        return {
+                            ...prevUserCardsInHand,
+                            cards: [...prevUserCardsInHand.cards, card.cards[0]],
+                        };
+                    });
+                } else {
+                    console.log({
+                        message: 'COMPUTER drew a card from the deck',
+                        whosTurn: whosTurn
+                    })
+                    setCompCardsInHand((prevCompCardsInHand) => {
+                        return {
+                            ...prevCompCardsInHand,
+                            cards: [...prevCompCardsInHand.cards, card.cards[0]],
+                        };
+                    })
+                }
 
             } catch (error) {
                 console.log(error);
             }
+            setTurn({
+                user: false,
+                computer: true,
+            });
+            // console.log('player card function', firstCard.cards[0].suit, firstCard.cards[0].value, firstCard.cards[0])
+            // gameFunctions.compCardPlayResponses(firstCard.cards[0].suit, firstCard.cards[0].value, firstCard.cards[0])
+            if (!firstCard) {
+                gameFunctions.compCardPlayResponses(firstCard.cards[0].suit, firstCard.cards[0].value, firstCard.cards[0])
+            }
+            else {
+                gameFunctions.compCardPlayResponses(firstCard.suit, firstCard.value, firstCard)
+            }            
         },
     };
 
     return (
         <GamePagePres
+
+            // Card hands & pile states
             cards={{
                 firstCard: firstCard,
                 userCardsInHand: userCardsInHand,
                 compCardsInHand: compCardsInHand,
             }}
 
+            // Game actions
             playerActions={{
                 putCardInPile: gameFunctions.putCardInPile,
                 playerDrawsACard: gameFunctions.playerDrawsACard,
                 handleCrazyEight: gameFunctions.handleCrazyEight,
             }}
 
+            // Crazy Eights modal state
             crazyEightState={{
                 isCrazyEight: isCrazyEight,
                 isSuitSelected: isSuitSelected,
