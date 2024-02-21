@@ -4,9 +4,9 @@ import { gamePageStyles } from "./styles/jss/gamePageStyles";
 import { CrazyEightContainer } from "../../components/modals/CrazyEight/Container";
 
 export const GamePagePres = ({
-    cards,
+    cardState,
     playerActions,
-    crazyEightState,
+    isSpecialCardSelected
 }) => {
 
     const theme = useTheme();
@@ -25,7 +25,7 @@ export const GamePagePres = ({
                     ...gamePageStyles.opponentCardStackContainer
                 }}
             >
-                {cards.compCardsInHand?.cards?.map((card) => (
+                {cardState?.computersCardsInHand?.map((card) => (
                     <Box
                         key={card.code}
                         component='img'
@@ -57,8 +57,8 @@ export const GamePagePres = ({
                 ))}
                 <Box
                     component='img'
-                    src={cards?.firstCard?.cards?.[0]?.image || cards?.firstCard?.image}
-                    alt='card pool'
+                    src={cardState?.topCardInPile?.image}
+                    alt='Card Pile'
                     sx={{
                         ...gamePageStyles.deckOfCardConainer.cardPool
                     }}
@@ -71,11 +71,11 @@ export const GamePagePres = ({
                         transform: 'translate(10%, -50%)',
                     }}
                 >
-                    {crazyEightState.isSuitSelected && (
+                    {isSpecialCardSelected?.crazyEightState?.suitSelected && (
                         <Typography
                             variant='h5'
                         >
-                            {crazyEightState.isSuitSelected} selected!
+                            {isSpecialCardSelected?.crazyEightState?.suitSelected} selected!
                         </Typography>
                     )}
                 </Container>
@@ -83,9 +83,9 @@ export const GamePagePres = ({
             <Container
                 sx={{ ...gamePageStyles.userCardStackContainer }}
             >
-                {cards.userCardsInHand?.cards?.map((card) => (
+                {cardState?.userCardsInHand?.map((card) => (
                     <Box
-                        onClick={() => playerActions.putCardInPile(card)}
+                        onClick={() => playerActions.putCardInPile(false, card)}
                         key={card.code}
                         component='img'
                         src={card.image}
@@ -97,7 +97,7 @@ export const GamePagePres = ({
                 ))}
             </Container>
             <CrazyEightContainer
-                isCrazyEight={crazyEightState.isCrazyEight}
+                isSpecialCardSelected={isSpecialCardSelected}
                 handleCrazyEight={playerActions.handleCrazyEight}
             />
         </Container>

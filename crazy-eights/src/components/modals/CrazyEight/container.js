@@ -1,13 +1,13 @@
 import { CrazyEightPres } from "./Pres"
 
 export const CrazyEightContainer = ({
-    isCrazyEight,
+    isSpecialCardSelected,
     handleCrazyEight,
 }) => {
 
     return (
         <CrazyEightPres
-            open={isCrazyEight}
+            open={isSpecialCardSelected?.crazyEight?.condition}
             onClose={handleCrazyEight}
         />
     )
