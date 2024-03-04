@@ -6,7 +6,7 @@ import { CrazyEightContainer } from "../../components/modals/CrazyEight/Containe
 export const GamePagePres = ({
     cardState,
     playerActions,
-    isSpecialCardSelected
+    crazyEight,
 }) => {
 
     const theme = useTheme();
@@ -43,7 +43,8 @@ export const GamePagePres = ({
             >
                 {[...Array(8)].map((_, index) => (
                     <Box
-                        onClick={playerActions.playerDrawsACard}
+                        // onClick={playerActions.playerDrawsACard}
+                        onClick={() => playerActions.playerDrawsACard(false, false)}
                         key={index}
                         component='img'
                         src='https://deckofcardsapi.com/static/img/back.png'
@@ -71,13 +72,13 @@ export const GamePagePres = ({
                         transform: 'translate(10%, -50%)',
                     }}
                 >
-                    {isSpecialCardSelected?.crazyEightState?.suitSelected && (
+                    {/* {isSpecialCardSelected?.crazyEight?.suitSelected && (
                         <Typography
                             variant='h5'
                         >
-                            {isSpecialCardSelected?.crazyEightState?.suitSelected} selected!
+                            {isSpecialCardSelected?.crazyEight?.suitSelected} selected!
                         </Typography>
-                    )}
+                    )} */}
                 </Container>
             </Container>
             <Container
@@ -85,7 +86,7 @@ export const GamePagePres = ({
             >
                 {cardState?.userCardsInHand?.map((card) => (
                     <Box
-                        onClick={() => playerActions.putCardInPile(false, card)}
+                        onClick={() => playerActions.handleUserTurn(card, false)}
                         key={card.code}
                         component='img'
                         src={card.image}
@@ -97,7 +98,7 @@ export const GamePagePres = ({
                 ))}
             </Container>
             <CrazyEightContainer
-                isSpecialCardSelected={isSpecialCardSelected}
+                crazyEight={crazyEight}
                 handleCrazyEight={playerActions.handleCrazyEight}
             />
         </Container>
