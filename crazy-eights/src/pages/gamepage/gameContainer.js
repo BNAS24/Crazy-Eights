@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { GamePagePres } from './gamePres';
 
 export const GameContainer = () => {
@@ -15,6 +15,12 @@ export const GameContainer = () => {
     });
 
     const [crazyEight, setCrazyEight] = useState(false);
+
+    // Global variable using useRef to keep track of card values for computer to make decisions and to hold immediately updated values.
+    const usersTurn = useRef(true);
+    const suitSelected = useRef(null);
+    const cardResolved = useRef(true);
+    const cardOnTop = useRef(null);
 
     useEffect(() => {
         let cleanUp = false;
@@ -56,6 +62,8 @@ export const GameContainer = () => {
                             cardPileHistory: [...prevState.cardPileHistory, ...firstCard.cards],
                             deck_id: deck.deck_id,
                         }));
+
+                        cardOnTop.current = firstCard.cards[0]
                     };
 
                     // Draw 8 cards for the user's hand
@@ -160,9 +168,9 @@ export const GameContainer = () => {
 
     /* Variable that will check if the user has to obey the rules
 of the current top card in the pile or continue to play as normal*/
-    let usersTurn = true;
-    let suitSelected = null;
-    let cardResolved = true;
+    // let usersTurn = true;
+    // let suitSelected = null;
+    // let cardResolved = true;
 
     const gameFunctions = {
         handleUserTurn: (card, pluck) => {
@@ -177,7 +185,7 @@ of the current top card in the pile or continue to play as normal*/
             };
 
             // Selecting  a card logic
-            if (usersTurn && !plucked) {
+            if (usersTurn.current && !plucked) {
                 const selectedCard = card;
 
                 // Captures the value of the function and stores it in a variable
@@ -191,11 +199,13 @@ of the current top card in the pile or continue to play as normal*/
                     gameFunctions.gameLogic.playACard(false, selectedCard);
 
                     // Resets card state
-                    suitSelected = null;
-                    cardResolved = true;
+                    suitSelected.current = null;
+                    cardResolved.current = true;
 
                     // Sets the state to the computers turn
-                    usersTurn = false;
+                    usersTurn.current = false;
+
+                    console.log('usersTurn', usersTurn);
 
                     //Calls the function for the user to respond to the users play decision.
                     gameFunctions.computerResponse(selectedCard); // I might want to use the actual selected card variable to make sure the state is updated fast enough
@@ -209,11 +219,21 @@ of the current top card in the pile or continue to play as normal*/
 
                 } else if (cardAndSate === 'drawTwo') {
 
+                    // Place the card down in the pile
+                    gameFunctions.gameLogic.playACard(false, selectedCard);
+
+                    // Make the computer draw two
                     gameFunctions.gameLogic.drawCards(false, true);
 
-                } else if (cardAndSate === 'skip') {
+                } else if (cardAndSate === 'skipPlayer') {
 
                     console.log('User skipped computers turn');
+
+                    gameFunctions.gameLogic.playACard(false, selectedCard);
+
+                    // Resets card state
+                    suitSelected.current = null;
+                    cardResolved.current = true;
 
                 } else if (cardAndSate === 'pluck') {
 
@@ -236,13 +256,13 @@ of the current top card in the pile or continue to play as normal*/
             console.log('Computer made a decision during their turn');
 
             const cardInPile = card;
-            const suit = cardInPile.suit;
-            const value = cardInPile.value;
+            const suit = cardInPile?.suit;
+            const value = cardInPile?.value;
 
             let randomlySelectedCard;
             let cardMatchedWithSuit;
 
-            if (!usersTurn) {
+            if (!usersTurn.current) {
                 // Logic to select a card a card
                 if (card) {
                     randomlySelectedCard = cardState.computersCardsInHand
@@ -271,11 +291,11 @@ of the current top card in the pile or continue to play as normal*/
                         gameFunctions.gameLogic.playACard(true, randomlySelectedCard);
 
                         // Resets card state
-                        suitSelected = null;
-                        cardResolved = true;
+                        suitSelected.current = null;
+                        cardResolved.current = true;
 
                         // Sets the state back to users turn
-                        usersTurn = true;
+                        usersTurn.current = true;
 
                     } else if (cardAndState === 'crazyEight') {
                         // Calls the function that puts down card in pile.
@@ -292,15 +312,31 @@ of the current top card in the pile or continue to play as normal*/
 
                         gameFunctions.gameLogic.handleCrazyEight(true, selectedSuit);
 
-                        console.log('suitSelected', suitSelected)
+                        console.log('suitSelected', suitSelected);
 
                     } else if (cardAndState === 'drawTwo') {
 
+                        cardResolved.current = false;
+
+                        // Places the card down
+                        gameFunctions.gameLogic.playACard(true, randomlySelectedCard);
+
+                        // Computer makes the user draw two cards
                         gameFunctions.gameLogic.drawCards(true, true);
 
-                    } else if (cardAndState === 'skip') {
+                        // Computer get another turn to make a decision
+                        // gameFunctions.computerResponse(randomlySelectedCard);
 
-                        console.log('User skipped computers turn');
+                        cardResolved.current = true;
+                        usersTurn.current = true;
+
+                    } else if (cardAndState === 'skipPlayer') {
+
+                        console.log('User skipped, computers turn');
+
+                        gameFunctions.gameLogic.playACard(true, randomlySelectedCard);
+
+                        usersTurn.current = false;
 
                     } else if (cardAndState === 'pluck') {
 
@@ -326,26 +362,45 @@ of the current top card in the pile or continue to play as normal*/
                         gameFunctions.gameLogic.playACard(true, cardMatchedWithSuit);
 
                         // Sets the suit selected state back to normal
-                        suitSelected = null;
-                        cardResolved = true;
+                        suitSelected.current = null;
+                        cardResolved.current = true;
+                        usersTurn.current = true;
 
                     } else if (cardAndState === 'crazyEight') {
                         // Play the card
                         gameFunctions.gameLogic.playACard(true, cardMatchedWithSuit);
 
                         // Sets the suit selected state back to normal
-                        suitSelected = null;
-                        cardResolved = true;
+                        suitSelected.current = null;
+                        cardResolved.current = false;
+
                     } else if (cardAndState === 'drawTwo') {
+
+                        cardResolved.current = false;
+
+                        gameFunctions.gameLogic.playACard(randomlySelectedCard);
+
                         // Computer makes the user draw two cards
                         gameFunctions.gameLogic.drawCards(true, true);
 
-                        // Sets the suit selected state back to normal
-                        suitSelected = null;
-                        cardResolved = true;
-                    } else if (cardAndState === 'skip') {
+                        // Computer get another turn to make a decision
+                        // gameFunctions.computerResponse(randomlySelectedCard);
 
-                        console.log('User skipped computers turn');
+                        // Sets the suit selected state back to normal
+                        suitSelected.current = null;
+                        cardResolved.current = true;
+
+                    } else if (cardAndState === 'skipPlayer') {
+
+                        console.log('User skipped, computers turn');
+
+                        gameFunctions.gameLogic.playACard(true, randomlySelectedCard);
+
+                        usersTurn.current = false;
+
+                        setTimeout(() => {
+                            gameFunctions.computerResponse(randomlySelectedCard);
+                        }, 1000);
 
                     } else if (cardAndState === 'pluck') {
 
@@ -354,8 +409,12 @@ of the current top card in the pile or continue to play as normal*/
                         gameFunctions.gameLogic.drawCards(true, false);
 
                     };
-                } else {
+                } else if ((randomlySelectedCard || cardMatchedWithSuit) === undefined) {
                     // Logic for when the computer cant find a matching card inside the deck.
+
+                    gameFunctions.gameLogic.drawCards(true, false);
+
+                    usersTurn.current = true;
                 };
                 // Logic to 
             } else {
@@ -373,16 +432,16 @@ of the current top card in the pile or continue to play as normal*/
 
                 const selectedCard = card;
                 const topCardInPile = cardState.topCardInPile;
-                const suitMatches = selectedCard.suit === topCardInPile.suit;
-                const crazyEightSuitMatches = suitSelected === selectedCard.suit;
-                const valueMatches = selectedCard.value === topCardInPile.value;
+                const suitMatches = selectedCard.suit === cardOnTop.current.suit;
+                const crazyEightSuitMatches = suitSelected.current === selectedCard.suit;
+                const valueMatches = selectedCard.value === cardOnTop.current.value;
                 const crazyEight = selectedCard.value === '8';
                 const skipPlayer = selectedCard.value === '4';
                 const drawTwo = selectedCard.value === '2';
                 const aSpecialCard = ['2', '4', '8'].includes(selectedCard.value);
 
-                if ((!aSpecialCard && (suitMatches || valueMatches) && cardResolved) ||
-                    (!aSpecialCard && crazyEightSuitMatches && !cardResolved)) {
+                if ((!aSpecialCard && (suitMatches || valueMatches) && cardResolved.current) ||
+                    (!aSpecialCard && crazyEightSuitMatches && !cardResolved.current)) {
                     // Logic for normal card
                     console.log(`${selectedCard.code} clears the normal card logic.`);
 
@@ -394,7 +453,7 @@ of the current top card in the pile or continue to play as normal*/
 
                     return 'crazyEight';
 
-                } else if ((drawTwo && suitMatches) || (drawTwo && crazyEightSuitMatches && !cardResolved)) {
+                } else if ((drawTwo && (valueMatches || suitMatches)) || (drawTwo && crazyEightSuitMatches && !cardResolved.current)) {
 
                     // Logic for card with the value of two
                     console.log(`${selectedCard.code} clears the draw two card logic.`);
@@ -402,19 +461,21 @@ of the current top card in the pile or continue to play as normal*/
                     // Return statement
                     return 'drawTwo';
 
-                } else if ((skipPlayer && suitMatches) || (skipPlayer && crazyEightSuitMatches && !cardResolved)) {
+                } else if ((skipPlayer && (valueMatches || suitMatches)) || (skipPlayer && crazyEightSuitMatches && !cardResolved.current)) {
                     // Logic for card with the value of four
                     console.log(`${selectedCard.code} clears the skip player card logic.`);
 
                     return 'skipPlayer';
                 } else {
-                    console.error({ 
+                    console.error({
                         message: 'Something went wrong when checking card',
                         usersTurn: usersTurn,
                         card: card,
+                        selectedCard: selectedCard,
                         topCardInPile: topCardInPile,
                         cardResolved: cardResolved,
                         suitSelected: suitSelected,
+                        cardOnTop: cardOnTop,
                     });
 
                     return 'pluck';
@@ -432,6 +493,9 @@ of the current top card in the pile or continue to play as normal*/
                         cardPileHistory: [...prevState.cardPileHistory, selectedCard],
                         computersCardsInHand: prevState.computersCardsInHand.filter(card => card.code !== selectedCard.code),
                     }));
+
+                    cardOnTop.current = selectedCard;
+
                 } else if (!fromComputer) {
                     // The functionality for user
                     setCardState(prevState => ({
@@ -440,6 +504,9 @@ of the current top card in the pile or continue to play as normal*/
                         userCardsInHand: prevState.userCardsInHand.filter(card => card.code !== selectedCard.code),
                         cardPileHistory: [...prevState.cardPileHistory, selectedCard],
                     }));
+
+                    cardOnTop.current = selectedCard;
+
                 } else {
 
                 };
@@ -450,6 +517,7 @@ of the current top card in the pile or continue to play as normal*/
                     alert: 'handleCrazyEight function running...',
                     event: event,
                     reason: reason,
+                    fromComputer: fromComputer,
                 });
 
                 if (reason === "backdropClick" || reason === "escapeKeyDown") {
@@ -457,23 +525,25 @@ of the current top card in the pile or continue to play as normal*/
                 };
 
                 if (fromComputer) {
+                    console.log('Computer for handleCrazyEight logic running.');
                     // Crazy eight logic for computer
-                    usersTurn = false;
-                    suitSelected = event;
-                    cardResolved = false;
+                    usersTurn.current = true;
+                    suitSelected.current = event;
+                    cardResolved.current = false;
 
                     setTimeout(() => {
                         setCrazyEight(false);
                     }, 2000);
 
-                } else {
-                    // Crazy eight logic for user
+                } else if (!fromComputer) {
+                    console.log('User for handleCrazyEight logic running.');
 
                     // Uppercase the suit in the event
                     const suitUpperCased = event.target.alt.toUpperCase();
 
-                    suitSelected = suitUpperCased;
-                    cardResolved = false;
+                    usersTurn.current = false;
+                    suitSelected.current = suitUpperCased;
+                    cardResolved.current = false;
                     setCrazyEight(false);
 
                     // Complete this statement below, you gotta pass arguments
@@ -498,21 +568,28 @@ of the current top card in the pile or continue to play as normal*/
                         // Computer plucks a card from the deck
                         await drawACard('computersCardsInHand');
                     } else {
+                        // Computer makes users draw two cards
+                        console.log('(drawCardsFunction, Computer is making the user draw two cards)');
                         // Computer makes user draw two cards
-                        await drawTwoCards('computersCardsInHand');
+                        await drawTwoCards('userCardsInHand');
                     };
 
                 } else if (!fromComputer) {
+
                     if (pluck === 'pluck') {
                         // User plucks a card from the deck
+                        console.log('User plucked a card from the deck');
                         await drawACard('userCardsInHand');
 
                         //Triggers computer response;
-                        usersTurn = false;
+                        usersTurn.current = false;
+
+                        // Trigger's computer's response to user plucking from the deck
                         gameFunctions.computerResponse(cardState.topCardInPile);
                     } else {
                         // User makes computer draw two cards
-                        await drawTwoCards('userCardsInHand');
+                        console.log('(drawCardsFunction, user is making the computer draw two cards)');
+                        await drawTwoCards('computersCardsInHand');
                     };
 
                 } else {

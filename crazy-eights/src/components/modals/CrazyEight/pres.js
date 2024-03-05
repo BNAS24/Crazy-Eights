@@ -34,13 +34,13 @@ export const CrazyEightPres = ({
                             component='img'
                             src='/heart-symbol.png'
                             alt='Hearts'
-                            onClick={onClose}
+                            onClick={(e) => onClose(false, e)}
                         />
                         <SuitItem
                             component='img'
                             src='/spade-symbol.png'
                             alt='Spades'
-                            onClick={onClose}
+                            onClick={(e) => onClose(false, e)}
                         />
                     </Container>
                     <Container
@@ -53,13 +53,13 @@ export const CrazyEightPres = ({
                             component='img'
                             src='/club-symbol.png'
                             alt='Clubs'
-                            onClick={onClose}
+                            onClick={(e) => onClose(false, e)}
                         />
                         <SuitItem
                             component='img'
                             src='/diamond-symbol.png'
                             alt='Diamonds'
-                            onClick={onClose}
+                            onClick={(e) => onClose(false, e)}
                         />
                     </Container>
                 </Container>
